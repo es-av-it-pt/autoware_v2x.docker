@@ -1,0 +1,17 @@
+repositories:
+  msgs/autoware_auto_msgs:
+    type: git
+    url: https://github.com/tier4/autoware_auto_msgs.git
+    version: 1e8b6d234e2690c9da386f006bb60835cdccddfd
+  msgs/autoware_adapi_msgs:
+    type: git
+    url: https://github.com/autowarefoundation/autoware_adapi_msgs.git
+    version: eb169b2d70edf52f186822b6e29e5e5727297a7a
+  v2x/autoware_v2x:
+    type: git
+    url: https://github.com/es-av-it-pt/AutowareV2X.git
+    version: feat/camapp
+  v2x/vanetza:
+    type: git
+    url: https://github.com/riebl/vanetza.git
+    version: master
