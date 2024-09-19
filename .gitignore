@@ -24,5 +24,8 @@ capture/
 # CodeChecker
 .codechecker/
 
+# Docker
+.cache/
+
 # AutowareV2X
 autoware_v2x.db

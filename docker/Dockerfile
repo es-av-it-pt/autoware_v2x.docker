@@ -3,13 +3,15 @@ FROM ros:$ROS_DISTRO
 
 RUN apt update
 RUN apt install -y \
+    apt-utils \
     python3-vcstool \
     libboost-all-dev \
     libcrypto++-dev \
     libgeographic-dev \
     libprotobuf-dev \
     libprotoc-dev \
-    protobuf-compiler
+    protobuf-compiler \
+    ros-humble-rmw-cyclonedds-cpp
 
 WORKDIR /v2x
 COPY . .
