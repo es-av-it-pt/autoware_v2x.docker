@@ -74,6 +74,10 @@ elif [ "$1" == "run" ]; then
     fi
   fi
 
+  cp -f docker/.env.example docker/.env
+  sed -i "s/ROS_HOSTNAME=.*/ROS_HOSTNAME=$hostname_ip/" docker/.env
+  sed -i "s/ROS_MASTER_URI=.*/ROS_MASTER_URI=http:\/\/$4:11311/" docker/.env
+
   PARAM_FILE=$(realpath "$2")
   MOUNT_OPTIONS="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml"
 
@@ -84,6 +88,8 @@ elif [ "$1" == "run" ]; then
     --network host \
     --env-file "docker/.env" \
     autoware_v2x
+
+  rm -f docker/.env
 
   exit $?
 else
