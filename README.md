@@ -15,5 +15,5 @@
 
 3. Run the Docker container using the script and specifying the path to the parameter file
     ```bash
-    ./docker.sh run /path/to/param.yaml <ros_network_interface> <ros_master_uri>
+    ./docker.sh run /path/to/param.yaml <ros_domain_id> <ros_network_interface> <ros_master_uri>
     ```

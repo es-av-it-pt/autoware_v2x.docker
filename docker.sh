@@ -34,7 +34,7 @@ if [ "$1" == "build" ]; then
   build
 elif [ "$1" == "run" ]; then
   if [ "$#" -ne 4 ]; then
-    echo "Usage: $0 run </path/to/autoware_v2x.param.yaml> <ros_network_interface> <master_ip>"
+    echo "Usage: $0 run </path/to/autoware_v2x.param.yaml> <ros_domain_id> <ros_network_interface> <master_ip>"
     exit 1
   fi
   if [ ! -f "$2" ]; then
@@ -54,13 +54,13 @@ elif [ "$1" == "run" ]; then
     exit 1
   fi
 
-  hostname_ip=$(/sbin/ifconfig "$3" | grep 'inet ' | awk '{print $2}')
+  hostname_ip=$(/sbin/ifconfig "$4" | grep 'inet ' | awk '{print $2}')
   if [ -z "$hostname_ip" ]; then
-    echo "Couldn't find ip address for interface: $3"
+    echo "Couldn't find ip address for interface: $4"
     exit 1
   fi
-  if ! is_valid_ip "$4"; then
-    echo "Invalid ROS master ip address: $4"
+  if ! is_valid_ip "$5"; then
+    echo "Invalid ROS master ip address: $5"
     exit 1
   fi
 
@@ -75,8 +75,9 @@ elif [ "$1" == "run" ]; then
   fi
 
   cp -f docker/.env.example docker/.env
+  sed -i "s/ROS_DOMAIN_ID=.*/ROS_DOMAIN_ID=$3/" docker/.env
   sed -i "s/ROS_HOSTNAME=.*/ROS_HOSTNAME=$hostname_ip/" docker/.env
-  sed -i "s/ROS_MASTER_URI=.*/ROS_MASTER_URI=http:\/\/$4:11311/" docker/.env
+  sed -i "s/ROS_MASTER_URI=.*/ROS_MASTER_URI=http:\/\/$5:11311/" docker/.env
 
   PARAM_FILE=$(realpath "$2")
   MOUNT_OPTIONS="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml"
