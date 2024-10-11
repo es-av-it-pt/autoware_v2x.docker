@@ -33,7 +33,7 @@ build() {
 if [ "$1" == "build" ]; then
   build
 elif [ "$1" == "run" ]; then
-  if [ "$#" -ne 4 ]; then
+  if [ "$#" -ne 5 ]; then
     echo "Usage: $0 run </path/to/autoware_v2x.param.yaml> <ros_domain_id> <ros_network_interface> <master_ip>"
     exit 1
   fi
@@ -54,7 +54,7 @@ elif [ "$1" == "run" ]; then
     exit 1
   fi
 
-  hostname_ip=$(/sbin/ifconfig "$4" | grep 'inet ' | awk '{print $2}')
+  hostname_ip=$(ifconfig "$4" | grep 'inet ' | awk '{print $2}')
   if [ -z "$hostname_ip" ]; then
     echo "Couldn't find ip address for interface: $4"
     exit 1

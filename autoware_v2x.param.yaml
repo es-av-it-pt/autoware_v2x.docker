@@ -1,6 +1,6 @@
 /**:
   ros__parameters:
-    link_layer: "ethernet"
+    link_layer: "cube-evk"
     network_interface: "v2x_testing"
     cube_ip: "172.0.0.1"
     is_sender: true
