@@ -82,7 +82,7 @@ elif [ "$1" == "run" ]; then
   PARAM_FILE=$(realpath "$2")
   MOUNT_OPTIONS="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml"
 
-  docker run -it --rm \
+  docker run -d --rm \
     --mount "${MOUNT_OPTIONS}" \
     --privileged \
     --name autoware_v2x \

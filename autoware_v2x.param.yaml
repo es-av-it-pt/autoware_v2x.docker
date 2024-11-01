@@ -4,6 +4,7 @@
     network_interface: "v2x_testing"
     cube_ip: "127.0.0.1"
     is_sender: true
+    publish_own_cams: false
     security: "none"
     certificate: ""
     certificate-key: ""
