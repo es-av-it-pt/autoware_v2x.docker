@@ -26,12 +26,47 @@ is_valid_ip() {
 
 build() {
   cd docker || { echo "Could not find docker directory"; exit 1; }
-  docker build -t "autoware_v2x" .
+  build_args=()
+  cohda_llc_include_dir=""
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      --no-cache)
+        build_args+=("--no-cache")
+        shift
+        ;;
+      --build-cohda)
+        shift
+        cohda_llc_include_dir="$1"
+        if [ -z "$cohda_llc_include_dir" ]; then
+          echo "Missing path to Cohda LLC library"
+          exit 1
+        fi
+        if [ ! -d "$cohda_llc_include_dir" ]; then
+          echo "Directory not found: $cohda_llc_include_dir"
+          exit 1
+        fi
+        ;;
+      *)
+        shift
+        ;;
+    esac
+  done
+
+  if [ -n "$cohda_llc_include_dir" ]; then
+    echo "Building with Cohda LLC support"
+    echo "Cohda LLC include directory: $cohda_llc_include_dir"
+    cp -fr "$cohda_llc_include_dir" cohda
+  else
+    echo "Building without Cohda LLC support"
+  fi
+
+  docker build -t "autoware_v2x" "${build_args[@]}" .
+  rm -rf cohda >/dev/null 2>&1
   exit $?
 }
 
 if [ "$1" == "build" ]; then
-  build
+  build "$@"
 elif [ "$1" == "run" ]; then
   if [ "$#" -ne 5 ]; then
     echo "Usage: $0 run </path/to/autoware_v2x.param.yaml> <ros_domain_id> <ros_network_interface> <master_ip>"

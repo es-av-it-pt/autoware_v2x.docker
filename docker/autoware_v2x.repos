@@ -14,4 +14,4 @@ repositories:
   v2x/vanetza:
     type: git
     url: https://github.com/riebl/vanetza.git
-    version: master
+    version: v24.10

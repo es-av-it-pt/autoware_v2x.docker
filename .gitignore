@@ -30,3 +30,4 @@ capture/
 # AutowareV2X
 autoware_v2x.db
 /docker/.env
+/docker/cohda
