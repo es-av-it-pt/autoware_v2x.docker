@@ -15,3 +15,7 @@ repositories:
     type: git
     url: https://github.com/riebl/vanetza.git
     version: v24.10
+  v2x/etsi_its_messages:
+    type: git
+    url: https://github.com/es-av-it-pt/etsi_its_messages.git
+    version: cam-ts-access-functions
