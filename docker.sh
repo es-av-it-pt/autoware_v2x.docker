@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CONTAINER_TAG="autoware_v2x"
+
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <command>"
   echo "  where <command> is one of: build, run"
@@ -60,7 +62,7 @@ build() {
     echo "Building without Cohda LLC support"
   fi
 
-  docker build -t "autoware_v2x" "${build_args[@]}" .
+  docker build -t "${CONTAINER_TAG}" "${build_args[@]}" .
   rm -rf cohda >/dev/null 2>&1
   exit $?
 }
@@ -99,7 +101,7 @@ elif [ "$1" == "run" ]; then
     exit 1
   fi
 
-  if ! docker image inspect "autoware_v2x" &> /dev/null; then
+  if ! docker image inspect "${CONTAINER_TAG}" &> /dev/null; then
     echo "Docker image not found. Do you want to build it now? [y/N]"
     read -r response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
@@ -107,6 +109,11 @@ elif [ "$1" == "run" ]; then
     else
       exit 1
     fi
+  fi
+
+  if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_TAG}$"; then
+    echo "Stopping existing container..."
+    docker rm -f autoware_v2x
   fi
 
   cp -f docker/.env.example docker/.env
@@ -117,14 +124,14 @@ elif [ "$1" == "run" ]; then
   PARAM_FILE=$(realpath "$2")
   MOUNT_OPTIONS="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml"
 
-  docker run -d --rm \
+  docker run -d \
     --mount "${MOUNT_OPTIONS}" \
     --privileged \
     --restart=on-failure \
     --name autoware_v2x \
     --network host \
     --env-file "docker/.env" \
-    autoware_v2x
+    "${CONTAINER_TAG}"
 
   rm -f docker/.env
 
