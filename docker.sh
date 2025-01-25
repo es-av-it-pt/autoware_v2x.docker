@@ -120,6 +120,7 @@ elif [ "$1" == "run" ]; then
   docker run -d --rm \
     --mount "${MOUNT_OPTIONS}" \
     --privileged \
+    --restart=on-failure \
     --name autoware_v2x \
     --network host \
     --env-file "docker/.env" \
