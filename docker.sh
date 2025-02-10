@@ -111,8 +111,8 @@ elif [ "$1" == "run" ]; then
     fi
   fi
 
-  if docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_TAG}$"; then
-    echo "Stopping existing container..."
+  if docker ps -a --format '{{.Names}}' | grep -q "autoware_v2x"; then
+    echo "Removing existing container..."
     docker rm -f autoware_v2x
   fi
 
@@ -127,7 +127,7 @@ elif [ "$1" == "run" ]; then
   docker run -d \
     --mount "${MOUNT_OPTIONS}" \
     --privileged \
-    --restart=on-failure \
+    --restart=unless-stopped \
     --name autoware_v2x \
     --network host \
     --env-file "docker/.env" \
