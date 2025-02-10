@@ -10,7 +10,7 @@ repositories:
   v2x/autoware_v2x:
     type: git
     url: https://github.com/es-av-it-pt/AutowareV2X.git
-    version: feat/camapp
+    version: main
   v2x/vanetza:
     type: git
     url: https://github.com/riebl/vanetza.git
