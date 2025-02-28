@@ -4,6 +4,7 @@ FROM ros:$ROS_DISTRO
 RUN apt update
 RUN apt install -y \
     apt-utils \
+    gpsd gpsd-clients gpsd-tools libgps-dev \
     python3-vcstool \
     libboost-all-dev \
     libcrypto++-dev \
