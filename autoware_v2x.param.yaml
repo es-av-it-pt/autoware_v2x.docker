@@ -2,12 +2,12 @@
   ros__parameters:
     link_layer: "ethernet" # "ethernet" | "cube-evk" | "cohda"
     target_device: "lo" # Should be the IP address of the target device or the network interface name
-    gpsd_host: "127.0.0.1"
-    gpsd_port: "2947"
+    gps_method: "gpsd" # "ros" | "gpsd"
+    gps_provider: "127.0.0.1"
     is_sender: true
     publish_own_cams: false
     cam_enabled: true
-    cpm_enabled: true
+    cpm_enabled: false
     security: "none"
     certificate: ""
     certificate-key: ""
