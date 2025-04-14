@@ -70,8 +70,8 @@ build() {
 if [ "$1" == "build" ]; then
   build "$@"
 elif [ "$1" == "run" ]; then
-  if [ "$#" -ne 5 ]; then
-    echo "Usage: $0 run </path/to/autoware_v2x.param.yaml> <ros_domain_id> <ros_network_interface> <master_ip>"
+  if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 run </path/to/autoware_v2x.param.yaml>"
     exit 1
   fi
   if [ ! -f "$2" ]; then
@@ -91,21 +91,11 @@ elif [ "$1" == "run" ]; then
     exit 1
   fi
 
-  hostname_ip=$(ifconfig "$4" | grep 'inet ' | awk '{print $2}')
-  if [ -z "$hostname_ip" ]; then
-    echo "Couldn't find ip address for interface: $4"
-    exit 1
-  fi
-  if ! is_valid_ip "$5"; then
-    echo "Invalid ROS master ip address: $5"
-    exit 1
-  fi
-
   if ! docker image inspect "${CONTAINER_TAG}" &> /dev/null; then
-    echo "Docker image not found. Do you want to build it now? [y/N]"
+    echo "Docker image not found. Do you want to pull it now? [y/N]"
     read -r response
     if [[ "$response" =~ ^([yY][eE][sS]|[yY])+$ ]]; then
-      build
+      docker pull "${CONTAINER_TAG}"
     else
       exit 1
     fi
@@ -117,9 +107,6 @@ elif [ "$1" == "run" ]; then
   fi
 
   cp -f docker/.env.example docker/.env
-  sed -i "s/ROS_DOMAIN_ID=.*/ROS_DOMAIN_ID=$3/" docker/.env
-  sed -i "s/ROS_HOSTNAME=.*/ROS_HOSTNAME=$hostname_ip/" docker/.env
-  sed -i "s/ROS_MASTER_URI=.*/ROS_MASTER_URI=http:\/\/$5:11311/" docker/.env
 
   PARAM_FILE=$(realpath "$2")
   MOUNT_OPTIONS="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml"
@@ -130,7 +117,8 @@ elif [ "$1" == "run" ]; then
     --restart=unless-stopped \
     --name autoware_v2x \
     --network host \
-    --env-file "docker/.env" \
+    -e ROS_LOCALHOST_ONLY='0' \
+    -e RMW_IMPLEMENTATION='rmw_cyclonedds_cpp' \
     "${CONTAINER_TAG}"
 
   rm -f docker/.env
