@@ -30,6 +30,7 @@ build() {
   cd docker || { echo "Could not find docker directory"; exit 1; }
   build_args=()
   cohda_llc_include_dir=""
+
   while [[ $# -gt 0 ]]; do
     case $1 in
       --no-cache)
@@ -47,6 +48,7 @@ build() {
           echo "Directory not found: $cohda_llc_include_dir"
           exit 1
         fi
+        shift
         ;;
       *)
         shift
@@ -68,26 +70,50 @@ build() {
 }
 
 if [ "$1" == "build" ]; then
+  shift
   build "$@"
+elif [ "$1" == "pull" ]; then
+  docker pull "${CONTAINER_TAG}"
 elif [ "$1" == "run" ]; then
-  if [ "$#" -ne 2 ]; then
-    echo "Usage: $0 run </path/to/autoware_v2x.param.yaml>"
+  if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 run <-it/-d> </path/to/autoware_v2x.param.yaml>"
+    echo "  where <path/to/autoware_v2x.param.yaml> is the path to the parameter file"
+    echo "  -it: Run the container in interactive mode"
+    echo "  -d: Run the container in detached mode"
     exit 1
   fi
-  if [ ! -f "$2" ]; then
-    echo "File not found: $2"
+  interactiveness=""
+  param_file_path=""
+  while [[ $# -gt 0 ]]; do
+    case $1 in
+      -d)
+        interactiveness="-d"
+        shift
+        ;;
+      -it)
+        interactiveness="-it"
+        shift
+        ;;
+      *)
+        param_file_path="$1"
+        shift
+        ;;
+    esac
+  done
+  if [ ! -f "$param_file_path" ]; then
+    echo "File not found: $param_file_path"
     exit 1
   fi
-  if [ ! -r "$2" ]; then
-    echo "File not readable: $2"
+  if [ ! -r "$param_file_path" ]; then
+    echo "File not readable: $param_file_path"
     exit 1
   fi
   if [ "${2: -5}" != ".yaml" ]; then
-    echo "File is not a .yaml file: $2"
+    echo "File is not a .yaml file: $param_file_path"
     exit 1
   fi
-  if [ ! -s "$2" ]; then
-    echo "File is empty: $2"
+  if [ ! -s "$param_file_path" ]; then
+    echo "File is empty: $param_file_path"
     exit 1
   fi
 
@@ -106,12 +132,10 @@ elif [ "$1" == "run" ]; then
     docker rm -f autoware_v2x
   fi
 
-  cp -f docker/.env.example docker/.env
-
-  PARAM_FILE=$(realpath "$2")
+  PARAM_FILE=$(realpath "$param_file_path")
   MOUNT_OPTIONS="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml"
 
-  docker run -d \
+  docker run "$interactiveness" \
     --mount "${MOUNT_OPTIONS}" \
     --privileged \
     --restart=unless-stopped \
@@ -124,6 +148,27 @@ elif [ "$1" == "run" ]; then
   rm -f docker/.env
 
   exit $?
+elif [ "$1" == "stop" ]; then
+  if docker ps -a --format '{{.Names}}' | grep -q "autoware_v2x"; then
+    echo "Stopping container..."
+    docker stop autoware_v2x
+  else
+    echo "Container not found."
+  fi
+elif [ "$1" == "rm" ]; then
+  if docker ps -a --format '{{.Names}}' | grep -q "autoware_v2x"; then
+    echo "Removing container..."
+    docker rm -f autoware_v2x
+  else
+    echo "Container not found."
+  fi
+elif [ "$1" == "attach" ]; then
+  if docker ps -a --format '{{.Names}}' | grep -q "autoware_v2x"; then
+    echo "Attaching to container..."
+    docker exec -it autoware_v2x bash
+  else
+    echo "Container not found."
+  fi
 else
   echo "Usage: $0 <command>"
   echo "  where <command> is one of: build, run"
