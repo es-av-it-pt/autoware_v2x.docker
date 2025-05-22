@@ -108,7 +108,7 @@ elif [ "$1" == "run" ]; then
     echo "File not readable: $param_file_path"
     exit 1
   fi
-  if [ "${2: -5}" != ".yaml" ]; then
+  if [[ "$param_file_path" != *.yaml ]]; then
     echo "File is not a .yaml file: $param_file_path"
     exit 1
   fi
