@@ -3,7 +3,7 @@
     link_layer: "ethernet" # "ethernet" | "cube-evk" | "cohda"
     target_device: "lo" # Should be the IP address of the target device or the network interface name
     gps_method: "gpsd" # "ros" | "gpsd"
-    gps_provider: "127.0.0.1"
+    gps_provider: "127.0.0.1:2947" # IP address and port of the GPSD server or ros topic
     is_sender: true
     cam_enabled: true
     cpm_enabled: false

@@ -69,13 +69,8 @@ build() {
   exit $?
 }
 
-if [ "$1" == "build" ]; then
-  shift
-  build "$@"
-elif [ "$1" == "pull" ]; then
-  docker pull "${CONTAINER_TAG}"
-elif [ "$1" == "run" ]; then
-  if [ "$#" -ne 3 ]; then
+run() {
+  if [ "$#" -ne 2 ]; then
     echo "Usage: $0 run <-it/-d> </path/to/autoware_v2x.param.yaml>"
     echo "  where <path/to/autoware_v2x.param.yaml> is the path to the parameter file"
     echo "  -it: Run the container in interactive mode"
@@ -148,6 +143,28 @@ elif [ "$1" == "run" ]; then
   rm -f docker/.env
 
   exit $?
+}
+
+if [ "$1" == "pull" ]; then
+  docker pull "${CONTAINER_TAG}"
+elif [ "$1" == "tag" ]; then
+  if [ -z "$2" ]; then
+    echo "Usage: $0 tag <new_tag>"
+    exit 1
+  fi
+  sed -i "s/^CONTAINER_TAG=.*/CONTAINER_TAG=\"$2\"/" "$0"
+elif [ "$1" == "push" ]; then
+  if [ -z "$2" ]; then
+    echo "Usage: $0 push <tag>"
+    exit 1
+  fi
+  docker push "$2"
+elif [ "$1" == "build" ]; then
+  shift
+  build "$@"
+elif [ "$1" == "run" ]; then
+  shift
+  run "$@"
 elif [ "$1" == "stop" ]; then
   if docker ps -a --format '{{.Names}}' | grep -q "autoware_v2x"; then
     echo "Stopping container..."
