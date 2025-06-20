@@ -1,0 +1,13 @@
+apt-utils
+gpsd gpsd-clients gpsd-tools libgps-dev
+python3-vcstool
+libboost-all-dev
+libcrypto++-dev
+libgeographic-dev
+libprotobuf-dev
+libprotoc-dev
+protobuf-compiler
+ros-humble-rmw-cyclonedds-cpp
+ros-humble-geographic-msgs
+ros-humble-gps-msgs
+ros-humble-etsi-its-messages

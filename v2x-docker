@@ -4,7 +4,7 @@ CONTAINER_TAG="autoware_v2x"
 
 if [ $# -eq 0 ]; then
   echo "Usage: $0 <command>"
-  echo "  where <command> is one of: build, run"
+  echo "  where <command> is one of: build, run, tag, pull, push, stop, rm, attach"
   exit 1
 fi
 
@@ -27,16 +27,15 @@ is_valid_ip() {
 }
 
 build() {
-  cd docker || { echo "Could not find docker directory"; exit 1; }
+  if [ ! -d "docker" ]; then
+    echo "Directory 'docker' not found. Please run this script from the root of the repository."
+    exit 1
+  fi
   build_args=()
   cohda_llc_include_dir=""
 
   while [[ $# -gt 0 ]]; do
     case $1 in
-      --no-cache)
-        build_args+=("--no-cache")
-        shift
-        ;;
       --build-cohda)
         shift
         cohda_llc_include_dir="$1"
@@ -51,6 +50,7 @@ build() {
         shift
         ;;
       *)
+        build_args+=("$1")
         shift
         ;;
     esac
@@ -59,13 +59,19 @@ build() {
   if [ -n "$cohda_llc_include_dir" ]; then
     echo "Building with Cohda LLC support"
     echo "Cohda LLC include directory: $cohda_llc_include_dir"
-    cp -fr "$cohda_llc_include_dir" cohda
+    cp -fr "$cohda_llc_include_dir" docker/cohda
   else
     echo "Building without Cohda LLC support"
   fi
 
-  docker build -t "${CONTAINER_TAG}" "${build_args[@]}" .
-  rm -rf cohda >/dev/null 2>&1
+  if [ ! -d "src" ]; then
+    mkdir -p src
+  fi
+  echo "Cloning repositories into src directory..."
+  vcs import src --skip-existing < docker/autoware_v2x.repos
+
+  docker build -t "${CONTAINER_TAG}" "${build_args[@]}" . -f docker/Dockerfile
+  rm -rf docker/cohda >/dev/null 2>&1
   exit $?
 }
 
@@ -82,14 +88,26 @@ run() {
   while [[ $# -gt 0 ]]; do
     case $1 in
       -d)
+        if [ -n "$interactiveness" ]; then
+          echo "Error: Cannot specify both -d and -it options."
+          exit 1
+        fi
         interactiveness="-d"
         shift
         ;;
       -it)
+        if [ -n "$interactiveness" ]; then
+          echo "Error: Cannot specify both -d and -it options."
+          exit 1
+        fi
         interactiveness="-it"
         shift
         ;;
       *)
+        if [ -n "$param_file_path" ]; then
+          echo "Error: Multiple parameter file paths specified."
+          exit 1
+        fi
         param_file_path="$1"
         shift
         ;;
@@ -140,25 +158,23 @@ run() {
     -e RMW_IMPLEMENTATION='rmw_cyclonedds_cpp' \
     "${CONTAINER_TAG}"
 
-  rm -f docker/.env
-
   exit $?
 }
 
 if [ "$1" == "pull" ]; then
   docker pull "${CONTAINER_TAG}"
-elif [ "$1" == "tag" ]; then
-  if [ -z "$2" ]; then
-    echo "Usage: $0 tag <new_tag>"
-    exit 1
-  fi
-  sed -i "s/^CONTAINER_TAG=.*/CONTAINER_TAG=\"$2\"/" "$0"
 elif [ "$1" == "push" ]; then
   if [ -z "$2" ]; then
     echo "Usage: $0 push <tag>"
     exit 1
   fi
   docker push "$2"
+elif [ "$1" == "tag" ]; then
+  if [ -z "$2" ]; then
+    echo "Usage: $0 tag <new_tag>"
+    exit 1
+  fi
+  sed -i "s|^CONTAINER_TAG=.*|CONTAINER_TAG=\"$2\"|" "$0"
 elif [ "$1" == "build" ]; then
   shift
   build "$@"
