@@ -32,19 +32,19 @@ build() {
     exit 1
   fi
   build_args=()
-  cohda_llc_include_dir=""
+  cohda_headers_dir=""
 
   while [[ $# -gt 0 ]]; do
     case $1 in
       --build-cohda)
         shift
-        cohda_llc_include_dir="$1"
-        if [ -z "$cohda_llc_include_dir" ]; then
+        cohda_headers_dir="$1"
+        if [ -z "$cohda_headers_dir" ]; then
           echo "Missing path to Cohda LLC library"
           exit 1
         fi
-        if [ ! -d "$cohda_llc_include_dir" ]; then
-          echo "Directory not found: $cohda_llc_include_dir"
+        if [ ! -d "$cohda_headers_dir" ]; then
+          echo "Directory not found: $cohda_headers_dir"
           exit 1
         fi
         shift
@@ -56,10 +56,10 @@ build() {
     esac
   done
 
-  if [ -n "$cohda_llc_include_dir" ]; then
+  if [ -n "$cohda_headers_dir" ]; then
     echo "Building with Cohda LLC support"
-    echo "Cohda LLC include directory: $cohda_llc_include_dir"
-    cp -fr "$cohda_llc_include_dir" docker/cohda
+    echo "Cohda LLC include directory: $cohda_headers_dir"
+    cp -fr "$cohda_headers_dir" docker/cohda-headers
   else
     echo "Building without Cohda LLC support"
   fi
@@ -71,7 +71,7 @@ build() {
   vcs import src --skip-existing < docker/autoware_v2x.repos
 
   docker build -t "${CONTAINER_TAG}" "${build_args[@]}" . -f docker/Dockerfile
-  rm -rf docker/cohda >/dev/null 2>&1
+  rm -rf docker/cohda-headers >/dev/null 2>&1
   exit $?
 }
 

@@ -13,7 +13,7 @@ BUILD_ARGS=(
   -DBUILD_SHARED_LIBS=ON
 )
 
-if [ -d /v2x/cohda ]; then
+if [ -d /v2x/cohda-headers ]; then
   BUILD_ARGS+=(-DBUILD_COHDA=1)
 fi
 
