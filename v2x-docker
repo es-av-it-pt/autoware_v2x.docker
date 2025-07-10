@@ -146,10 +146,22 @@ run() {
   fi
 
   PARAM_FILE=$(realpath "$param_file_path")
-  MOUNT_OPTIONS="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml"
+  PARAM_FILE_MOUNT="type=bind,source=$PARAM_FILE,target=/v2x/install/autoware_v2x/share/autoware_v2x/config/autoware_v2x.param.yaml,readonly"
+
+  if which llc >/dev/null 2>&1 && which libLLC.so >/dev/null 2>&1; then
+    echo "Cohda LLC library found, enabling Cohda LLC support"
+    COHDA_DIR=$(dirname "$(dirname "$(which llc)")")
+    LLC_LIB=$(which libLLC.so)
+    LLC_MOUNT="type=bind,source=$COHDA_DIR,target=/opt/cohda"
+    LLC_LIB_MOUNT="type=bind,source=$LLC_LIB,target=/usr/lib/libLLC.so,readonly"
+    COHDA_MOUNTS="--mount ${LLC_MOUNT} --mount ${LLC_LIB_MOUNT}"
+  else
+    COHDA_MOUNTS=""
+  fi
 
   docker run "$interactiveness" \
-    --mount "${MOUNT_OPTIONS}" \
+    --mount "${PARAM_FILE_MOUNT}" \
+    "$COHDA_MOUNTS" \
     --privileged \
     --restart=unless-stopped \
     --name autoware_v2x \
