@@ -176,11 +176,7 @@ run() {
 if [ "$1" == "pull" ]; then
   docker pull "${CONTAINER_TAG}"
 elif [ "$1" == "push" ]; then
-  if [ -z "$2" ]; then
-    echo "Usage: $0 push <tag>"
-    exit 1
-  fi
-  docker push "$2"
+  docker push "${CONTAINER_TAG}"
 elif [ "$1" == "tag" ]; then
   if [ -z "$2" ]; then
     echo "Usage: $0 tag <new_tag>"
